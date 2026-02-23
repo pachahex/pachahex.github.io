@@ -143,10 +143,75 @@
             letter-spacing: 1px;
         }
 
+        /* Tab navigation */
+        .tab-nav {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding: 0 2rem;
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--brown-dark);
+        }
+
+        .tab-btn {
+            padding: 0.85rem 1.75rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--green);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--green);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .tab-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .tab-count {
+            font-size: 0.75rem;
+            background: rgba(74, 170, 109, 0.2);
+            color: var(--green);
+            padding: 0.1rem 0.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .tab-btn:not(.active) .tab-count {
+            background: rgba(86, 74, 74, 0.3);
+            color: var(--text-secondary);
+        }
+
         /* Search & Filters */
         .controls {
             max-width: 1200px;
-            margin: 2rem auto;
+            margin: 1.5rem auto;
             padding: 0 2rem;
             display: flex;
             gap: 1rem;
@@ -242,6 +307,30 @@
             opacity: 1;
         }
 
+        .repo-card.collab-card::before {
+            background: linear-gradient(90deg, var(--brown), var(--green));
+        }
+
+        .repo-owner-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .repo-owner-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid var(--brown);
+        }
+
+        .repo-owner-name {
+            font-size: 0.8rem;
+            color: var(--brown-light);
+            font-weight: 500;
+        }
+
         .repo-name {
             font-size: 1.25rem;
             font-weight: 600;
@@ -304,10 +393,20 @@
             border: 1px solid var(--brown);
         }
 
+        .collab-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 50px;
+            background: rgba(74, 170, 109, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(74, 170, 109, 0.4);
+        }
+
         /* Loading */
         .loading {
             text-align: center;
             padding: 4rem 2rem;
+            grid-column: 1 / -1;
         }
 
         .spinner {
@@ -329,6 +428,7 @@
             padding: 3rem;
             color: var(--text-secondary);
             font-size: 1.1rem;
+            grid-column: 1 / -1;
         }
 
         /* Footer */
@@ -367,6 +467,11 @@
                 width: 90px;
                 height: 90px;
             }
+
+            .tab-btn {
+                padding: 0.7rem 1rem;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -390,6 +495,10 @@
             <div class="stat-label">Repositorios</div>
         </div>
         <div class="stat-item">
+            <div class="stat-number" id="collab-count">-</div>
+            <div class="stat-label">Colaboraciones</div>
+        </div>
+        <div class="stat-item">
             <div class="stat-number" id="followers-count">-</div>
             <div class="stat-label">Seguidores</div>
         </div>
@@ -398,6 +507,19 @@
             <div class="stat-label">Siguiendo</div>
         </div>
     </div>
+
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="my-repos" onclick="switchTab('my-repos')">
+            <svg viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1h-8a1 1 0 00-1 1v6.708A2.486 2.486 0 014.5 9h8V1.5zm-8 11h8v1.5h-8a1 1 0 110-1.5z"/></svg>
+            Mis Repositorios
+            <span class="tab-count" id="my-repos-count">0</span>
+        </button>
+        <button class="tab-btn" data-tab="collabs" onclick="switchTab('collabs')">
+            <svg viewBox="0 0 16 16"><path d="M2 5.5a3.5 3.5 0 115.898 2.549 5.507 5.507 0 013.034 4.084.75.75 0 11-1.482.235 4.001 4.001 0 00-7.9 0 .75.75 0 01-1.482-.236A5.507 5.507 0 013.102 8.05 3.49 3.49 0 012 5.5zM11 4a.75.75 0 100 1.5 1.5 1.5 0 01.666 2.844.75.75 0 00-.416.672v.352a.75.75 0 00.574.73c1.2.289 2.162 1.2 2.522 2.372a.75.75 0 101.434-.44 5.01 5.01 0 00-2.56-3.012A3 3 0 0011 4zM5.5 3a2 2 0 100 4 2 2 0 000-4z"/></svg>
+            Colaboraciones
+            <span class="tab-count" id="collabs-count">0</span>
+        </button>
+    </nav>
 
     <div class="controls">
         <input type="text" class="search-box" id="search" placeholder="🔍 Buscar repositorio...">
@@ -429,10 +551,14 @@
             TypeScript: '#2b7489', Java: '#b07219', 'C++': '#f34b7d', C: '#555555',
             'C#': '#178600', Ruby: '#701516', Go: '#00ADD8', PHP: '#4F5D95',
             Swift: '#ffac45', Kotlin: '#A97BFF', Rust: '#dea584', Shell: '#89e051',
-            Dart: '#00B4AB', Vue: '#41b883', SCSS: '#c6538c', Jupyter: '#DA5B0B'
+            Dart: '#00B4AB', Vue: '#41b883', SCSS: '#c6538c', Jupyter: '#DA5B0B',
+            Lua: '#000080', R: '#198CE7', Scala: '#c22d40', Perl: '#0298c3',
+            Haskell: '#5e5086', Elixir: '#6e4a7e', Clojure: '#db5855'
         };
 
         let allRepos = [];
+        let collabRepos = [];
+        let currentTab = 'my-repos';
 
         async function fetchProfile() {
             try {
@@ -457,16 +583,59 @@
             try {
                 const res = await fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${page}&sort=updated`);
                 const repos = await res.json();
-                if (!Array.isArray(repos)) {
-                    return accumulated;
-                }
+                if (!Array.isArray(repos)) return accumulated;
                 accumulated = accumulated.concat(repos);
-                if (repos.length === 100) {
-                    return fetchRepos(page + 1, accumulated);
-                }
+                if (repos.length === 100) return fetchRepos(page + 1, accumulated);
                 return accumulated;
             } catch (e) {
                 return accumulated;
+            }
+        }
+
+        async function fetchCollabRepos() {
+            const collabMap = new Map();
+            try {
+                // Fetch recent public events to find repos where user contributed
+                for (let page = 1; page <= 3; page++) {
+                    const res = await fetch(`https://api.github.com/users/${USERNAME}/events/public?per_page=100&page=${page}`);
+                    const events = await res.json();
+                    if (!Array.isArray(events) || events.length === 0) break;
+
+                    const contributionTypes = [
+                        'PushEvent', 'PullRequestEvent', 'PullRequestReviewEvent',
+                        'IssuesEvent', 'IssueCommentEvent', 'CommitCommentEvent',
+                        'CreateEvent'
+                    ];
+
+                    for (const event of events) {
+                        if (contributionTypes.includes(event.type) && event.repo) {
+                            const repoFullName = event.repo.name;
+                            const owner = repoFullName.split('/')[0];
+                            if (owner.toLowerCase() !== USERNAME.toLowerCase() && !collabMap.has(repoFullName)) {
+                                collabMap.set(repoFullName, event.repo);
+                            }
+                        }
+                    }
+                }
+
+                // Fetch full repo details for each collaborated repo
+                const repoDetails = [];
+                for (const [fullName] of collabMap) {
+                    try {
+                        const res = await fetch(`https://api.github.com/repos/${fullName}`);
+                        if (res.ok) {
+                            const repo = await res.json();
+                            if (!repo.private) {
+                                repoDetails.push(repo);
+                            }
+                        }
+                    } catch (e) {
+                        // Skip repos that can't be fetched
+                    }
+                }
+                return repoDetails;
+            } catch (e) {
+                return [];
             }
         }
 
@@ -491,14 +660,19 @@
             return 'justo ahora';
         }
 
-        function renderRepos(repos) {
-            const grid = document.getElementById('repos-grid');
-            if (repos.length === 0) {
-                grid.innerHTML = '<div class="no-results">No se encontraron repositorios 😕</div>';
-                return;
-            }
-            grid.innerHTML = repos.map(repo => `
-                <a href="${repo.html_url}" target="_blank" rel="noopener" class="repo-card">
+        function renderRepoCard(repo, isCollab = false) {
+            const ownerRow = isCollab ? `
+                <div class="repo-owner-row">
+                    <img class="repo-owner-avatar" src="${repo.owner.avatar_url}" alt="${repo.owner.login}">
+                    <span class="repo-owner-name">${repo.owner.login}</span>
+                </div>
+            ` : '';
+
+            const collabBadge = isCollab ? '<span class="collab-badge">Colaborador</span>' : '';
+
+            return `
+                <a href="${repo.html_url}" target="_blank" rel="noopener" class="repo-card ${isCollab ? 'collab-card' : ''}">
+                    ${ownerRow}
                     <div class="repo-name">
                         <svg viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1h-8a1 1 0 00-1 1v6.708A2.486 2.486 0 014.5 9h8V1.5zm-8 11h8v1.5h-8a1 1 0 110-1.5z"/></svg>
                         ${repo.name}
@@ -524,13 +698,26 @@
                             </span>
                         ` : ''}
                         ${repo.fork ? '<span class="fork-badge">Fork</span>' : ''}
+                        ${collabBadge}
                         <span class="meta-item">
                             <svg viewBox="0 0 16 16"><path d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.37.65l2.5 1.5a.75.75 0 10.76-1.3L8.5 7.94V4.75z"/></svg>
                             ${timeAgo(repo.updated_at)}
                         </span>
                     </div>
                 </a>
-            `).join('');
+            `;
+        }
+
+        function renderRepos(repos, isCollab = false) {
+            const grid = document.getElementById('repos-grid');
+            if (repos.length === 0) {
+                const msg = isCollab
+                    ? 'No se encontraron colaboraciones públicas recientes 🤝'
+                    : 'No se encontraron repositorios 😕';
+                grid.innerHTML = `<div class="no-results">${msg}</div>`;
+                return;
+            }
+            grid.innerHTML = repos.map(repo => renderRepoCard(repo, isCollab)).join('');
         }
 
         function sortRepos(repos, criteria) {
@@ -551,13 +738,32 @@
         function filterAndRender() {
             const query = document.getElementById('search').value.toLowerCase();
             const sortBy = document.getElementById('sort').value;
-            let filtered = allRepos.filter(repo =>
+            const isCollab = currentTab === 'collabs';
+            const source = isCollab ? collabRepos : allRepos;
+
+            let filtered = source.filter(repo =>
                 repo.name.toLowerCase().includes(query) ||
                 (repo.description && repo.description.toLowerCase().includes(query)) ||
-                (repo.language && repo.language.toLowerCase().includes(query))
+                (repo.language && repo.language.toLowerCase().includes(query)) ||
+                (isCollab && repo.owner && repo.owner.login.toLowerCase().includes(query))
             );
             filtered = sortRepos(filtered, sortBy);
-            renderRepos(filtered);
+            renderRepos(filtered, isCollab);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+
+            const searchBox = document.getElementById('search');
+            searchBox.value = '';
+            searchBox.placeholder = tab === 'collabs'
+                ? '🔍 Buscar colaboración...'
+                : '🔍 Buscar repositorio...';
+
+            filterAndRender();
         }
 
         document.getElementById('search').addEventListener('input', filterAndRender);
@@ -565,8 +771,22 @@
 
         async function init() {
             fetchProfile();
+
+            // Fetch own repos
             allRepos = await fetchRepos();
+            document.getElementById('my-repos-count').textContent = allRepos.length;
             filterAndRender();
+
+            // Fetch collaborated repos in background
+            const grid = document.getElementById('repos-grid');
+            collabRepos = await fetchCollabRepos();
+            document.getElementById('collab-count').textContent = collabRepos.length;
+            document.getElementById('collabs-count').textContent = collabRepos.length;
+
+            // Re-render if user is on collabs tab
+            if (currentTab === 'collabs') {
+                filterAndRender();
+            }
         }
 
         init();
