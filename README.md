@@ -38,8 +38,12 @@ No se utilizan frameworks ni dependencias externas: todo el código corre en el 
 
 ```
 pachahex.github.io/
-├── index.html   # Página única (HTML + CSS + JS inline)
-└── README.md    # Documentación del proyecto
+├── index.html        # Estructura HTML de la página
+├── css/
+│   └── styles.css    # Estilos y diseño responsivo
+├── js/
+│   └── app.js        # Lógica de la aplicación y consumo de la API
+└── README.md         # Documentación del proyecto
 ```
 
 ---
@@ -77,7 +81,7 @@ El sitio se publica automáticamente en `https://<usuario>.github.io` al hacer p
 
 ### Personalización
 
-Para adaptar este sitio a otro usuario de GitHub, sólo hay que cambiar la constante en el bloque `<script>` de `index.html`:
+Para adaptar este sitio a otro usuario de GitHub, sólo hay que cambiar la constante al inicio de `js/app.js`:
 
 ```js
 const USERNAME = 'pachahex'; // ← reemplaza con el nombre de usuario deseado
