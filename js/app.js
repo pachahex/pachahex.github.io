@@ -47,11 +47,11 @@ async function fetchRepos(page = 1, accumulated = []) {
 
 async function fetchCollabRepos() {
     try {
-        const res = await fetch(`https://api.github.com/users/${USERNAME}/repos?type=member&per_page=100`);
+        const res = await fetch(`https://api.github.com/search/repositories?q=collaborator:${USERNAME}&per_page=100`);
         if (!res.ok) return [];
-        const repos = await res.json();
-        if (!Array.isArray(repos)) return [];
-        return repos.filter(repo => !repo.private);
+        const data = await res.json();
+        if (!data.items || !Array.isArray(data.items)) return [];
+        return data.items.filter(repo => !repo.private);
     } catch (e) {
         return [];
     }
