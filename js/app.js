@@ -46,12 +46,47 @@ async function fetchRepos(page = 1, accumulated = []) {
 }
 
 async function fetchCollabRepos() {
+    const collabMap = new Map();
     try {
-        const res = await fetch(`https://api.github.com/users/${USERNAME}/repos?type=member&per_page=100`);
-        if (!res.ok) return [];
-        const repos = await res.json();
-        if (!Array.isArray(repos)) return [];
-        return repos.filter(repo => !repo.private);
+        // Fetch recent public events to find repos where user contributed
+        for (let page = 1; page <= 3; page++) {
+            const res = await fetch(`https://api.github.com/users/${USERNAME}/events/public?per_page=100&page=${page}`);
+            const events = await res.json();
+            if (!Array.isArray(events) || events.length === 0) break;
+
+            const contributionTypes = [
+                'PushEvent', 'PullRequestEvent', 'PullRequestReviewEvent',
+                'IssuesEvent', 'IssueCommentEvent', 'CommitCommentEvent',
+                'CreateEvent'
+            ];
+
+            for (const event of events) {
+                if (contributionTypes.includes(event.type) && event.repo) {
+                    const repoFullName = event.repo.name;
+                    const owner = repoFullName.split('/')[0];
+                    if (owner.toLowerCase() !== USERNAME.toLowerCase() && !collabMap.has(repoFullName)) {
+                        collabMap.set(repoFullName, event.repo);
+                    }
+                }
+            }
+        }
+
+        // Fetch full repo details for each collaborated repo
+        const repoDetails = [];
+        for (const [fullName] of collabMap) {
+            try {
+                const res = await fetch(`https://api.github.com/repos/${fullName}`);
+                if (res.ok) {
+                    const repo = await res.json();
+                    if (!repo.private) {
+                        repoDetails.push(repo);
+                    }
+                }
+            } catch (e) {
+                // Skip repos that can't be fetched
+            }
+        }
+        return repoDetails;
     } catch (e) {
         return [];
     }
